@@ -22,21 +22,14 @@ jobs:
       run: |
         cd src
         make
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v3
-      with:
-        name: tg-bot
-        path: '${{ github.workspace }}/src/target/tg-bot-linux'
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: tg-bot
+      - name: Move bin
+        run: mv src/target/tg-bot-linux tg-bot
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@main
         env:

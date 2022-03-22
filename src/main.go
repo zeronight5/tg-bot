@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -53,16 +54,15 @@ func main() {
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
-			case "help":
-				msg.Text = "type /start or /torrent ID."
+			case "help", "start":
+				msg.Text = "type /torrent ID."
 			case "torrent":
 				arguments := update.Message.CommandArguments()
 				if arguments == "" {
-					msg.Text = "Please input ID, such as /torrent ID."
+					msg.Text = random(config.Host)
 				} else {
-					magnet := getMagnet(searchUrl(config.Host, arguments))
-					msg.ParseMode = "html"
-					msg.Text = "You supplied the ID: " + arguments + " ; and I found this: \n<a href=\"" + magnet + "\">" + magnet + "</a>"
+					magnet := getMagnet(search(config.Host, arguments))
+					msg.Text = magnet
 				}
 			default:
 				msg.Text = "I don't know that command"
@@ -75,7 +75,23 @@ func main() {
 	}
 }
 
-func parseGetHtml(url string) *goquery.Document {
+func random(host string) string {
+	html := parseHtml("https://" + host + "/search")
+	if html == nil {
+		return "nothing."
+	}
+	find := html.Find(".tags-box a")
+	ids := make([]string, find.Size())
+	find.Each(func(i int, s *goquery.Selection) {
+		link, _ := s.Attr("href")
+		ids = append(ids, link)
+	})
+	link := ids[rand.Intn(len(ids))]
+	id := link[strings.LastIndex(link, "/")+1:]
+	return getMagnet(search(host, id))
+}
+
+func parseHtml(url string) *goquery.Document {
 	if strings.HasPrefix(url, "//") {
 		url = "https:" + url
 	}
@@ -104,8 +120,8 @@ func parseGetHtml(url string) *goquery.Document {
 	return doc
 }
 
-func searchUrl(host string, id string) string {
-	doc := parseGetHtml("https://" + host + "/search/" + id)
+func search(host string, id string) string {
+	doc := parseHtml("https://" + host + "/search/" + id)
 
 	if doc == nil {
 		return "nothing."
@@ -137,7 +153,7 @@ func getMagnet(url string) string {
 	if url == "" {
 		return "nothing."
 	}
-	doc := parseGetHtml(url)
+	doc := parseHtml(url)
 
 	if doc == nil {
 		return "nothing."

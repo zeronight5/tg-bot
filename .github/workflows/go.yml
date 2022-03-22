@@ -44,4 +44,4 @@ jobs:
         script: |
           cd "$BIN_DIR"
           touch `date +%s`
-          nohup ./tg-bot-linux config.json &
+          ./tg-bot-linux config.json > run.log 2>&1 &

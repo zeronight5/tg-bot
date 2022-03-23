@@ -22,6 +22,8 @@ jobs:
       run: |
         cd src
         make
+        cd ..
+        cp start.sh src/target/
 
     - name: Deploy to Server
       uses: easingthemes/ssh-deploy@main
@@ -43,5 +45,4 @@ jobs:
         envs: BIN_DIR
         script: |
           cd "$BIN_DIR"
-          touch `date +%s`
-          ./tg-bot-linux config.json > run.log 2>&1 &
+          sh start.sh

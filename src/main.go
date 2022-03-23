@@ -18,6 +18,7 @@ import (
 type AppConfig struct {
 	Host  string `json:"host"`
 	Token string `json:"token"`
+	Debug bool   `json:"debug"`
 }
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 		log.Panic(err)
 	}
 
-	bot.Debug = true
+	bot.Debug = config.Debug
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 

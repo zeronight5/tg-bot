@@ -22,7 +22,7 @@ jobs:
       run: |
         cd src
         make
-        cp config.sh target/
+        cp config.json target/
         cd ..
         cp start.sh src/target/
 

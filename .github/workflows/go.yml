@@ -22,6 +22,7 @@ jobs:
       run: |
         cd src
         make
+        cp config.sh target/
         cd ..
         cp start.sh src/target/
 
@@ -37,12 +38,14 @@ jobs:
       uses: appleboy/ssh-action@master
       env:
         BIN_DIR: ${{ secrets.REMOTE_TARGET }}
+        BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SERVER_SSH_KEY }}
         script_stop: true
-        envs: BIN_DIR
+        envs: BIN_DIR,BOT_TOKEN
         script: |
           cd "$BIN_DIR"
+          sed -i "s/your telegram bot token/$BOT_TOKEN/g" config.json
           sh start.sh
